@@ -3,8 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Budget Tracker · January 2025</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>FinTrack</title>
+<meta name="description" content="FinTrack — personal budget tracker. Plan and track your income, expenses, bills, savings, debt, and investments.">
+<meta property="og:title" content="FinTrack">
+<meta property="og:description" content="Personal budget tracker for income, expenses, bills, savings, debt, and investments.">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg:         #0d1a12;
@@ -22,7 +25,7 @@
     --text:       #e8f5ee;
     --text-dim:   #86a890;
     --text-muted: #4d7a5a;
-    --font-display: 'DM Serif Display', serif;
+    --font-display: 'Outfit', sans-serif;
     --font-body:    'Sora', sans-serif;
     --font-mono:    'DM Mono', monospace;
     --radius:     12px;
@@ -74,6 +77,7 @@
   .logo-title {
     font-family: var(--font-display);
     font-size: 22px;
+    font-weight: 700;
     color: var(--text);
     letter-spacing: -0.5px;
   }
@@ -613,7 +617,7 @@
 
 <header>
   <div class="logo">
-    <span class="logo-title">BudgetLeaf</span>
+    <span class="logo-title">FinTrack</span>
     <span class="logo-badge" id="yearBadge">GH₵ · 2025</span>
   </div>
   <div class="header-right">
@@ -630,6 +634,13 @@
       <option value="October">October</option>
       <option value="November">November</option>
       <option value="December">December</option>
+    </select>
+    <select class="month-selector" id="currencySelect" onchange="switchCurrency(this.value)">
+      <option value="GHC">₵ Cedi</option>
+      <option value="USD">$ Dollar</option>
+      <option value="GBP">£ Pound</option>
+      <option value="EUR">€ Euro</option>
+      <option value="NGN">₦ Naira</option>
     </select>
     <button class="btn btn-ghost" onclick="resetMonth()">↺ <span>Reset</span></button>
     <button class="btn btn-primary" onclick="saveAll()">💾 <span>Save</span></button>
@@ -769,6 +780,16 @@ const YEAR = new Date().getFullYear();
 const MONTHS = ['January','February','March','April','May','June',
                 'July','August','September','October','November','December'];
 
+const CURRENCIES = {
+  GHC: { symbol: 'GH₵', short: '₵',  locale: 'en-GH' },
+  USD: { symbol: '$',    short: '$',  locale: 'en-US' },
+  GBP: { symbol: '£',   short: '£',  locale: 'en-GB' },
+  EUR: { symbol: '€',   short: '€',  locale: 'de-DE' },
+  NGN: { symbol: '₦',   short: '₦',  locale: 'en-NG' },
+};
+
+let currentCurrency = 'GHC';
+
 const SECTIONS_META = [
   { id:'income',      label:'Income',      icon:'💼', color:'#4ade80', hasProgress:false,
     defaults:[
@@ -820,7 +841,7 @@ let currentMonth = 'January';
 let data = {}; // { monthName: { sectionId: [{name, planned, actual}] } }
 
 // ── Storage ────────────────────────────────────────────────────────────────
-function storageKey() { return `budgetleaf_${YEAR}`; }
+function storageKey() { return `fintrack_${YEAR}`; }
 
 function loadFromStorage() {
   try {
@@ -848,11 +869,13 @@ function getMonthData(month) {
 // ── Format ─────────────────────────────────────────────────────────────────
 function fmt(n) {
   if (isNaN(n) || n === null || n === '') return '—';
-  return 'GH₵ ' + Number(n).toLocaleString('en-GH', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const { symbol, locale } = CURRENCIES[currentCurrency];
+  return symbol + ' ' + Number(n).toLocaleString(locale, {minimumFractionDigits:2, maximumFractionDigits:2});
 }
 function fmtShort(n) {
-  if (!n) return 'GH₵ 0';
-  return 'GH₵ ' + Number(n).toLocaleString('en-GH', {minimumFractionDigits:0, maximumFractionDigits:0});
+  const { symbol, locale } = CURRENCIES[currentCurrency];
+  if (!n) return symbol + ' 0';
+  return symbol + ' ' + Number(n).toLocaleString(locale, {minimumFractionDigits:0, maximumFractionDigits:0});
 }
 function pct(actual, planned) {
   if (!planned || planned == 0) return null;
@@ -935,7 +958,7 @@ function renderRows(sectionId) {
             type="number" min="0" step="0.01"
             onchange="updateItem('${sectionId}',${idx},'planned',this.value)"
             oninput="updateItem('${sectionId}',${idx},'planned',this.value)" />
-          <span class="currency-prefix">₵</span>
+          <span class="currency-prefix">${CURRENCIES[currentCurrency].short}</span>
         </div>
       </td>
       <td>
@@ -944,7 +967,7 @@ function renderRows(sectionId) {
             type="number" min="0" step="0.01"
             onchange="updateItem('${sectionId}',${idx},'actual',this.value)"
             oninput="updateItem('${sectionId}',${idx},'actual',this.value)" />
-          <span class="currency-prefix">₵</span>
+          <span class="currency-prefix">${CURRENCIES[currentCurrency].short}</span>
         </div>
       </td>
       ${meta.hasProgress ? `
@@ -1156,9 +1179,21 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
+// ── Currency ───────────────────────────────────────────────────────────────
+function switchCurrency(code) {
+  currentCurrency = code;
+  localStorage.setItem('fintrack_currency', code);
+  document.getElementById('yearBadge').textContent = `${CURRENCIES[code].symbol} · ${YEAR}`;
+  buildSections();
+  updateAll();
+}
+
 // ── Init ───────────────────────────────────────────────────────────────────
-document.getElementById('yearBadge').textContent = `GH₵ · ${YEAR}`;
-document.title = `Budget Tracker · ${YEAR}`;
+const savedCurrency = localStorage.getItem('fintrack_currency') || 'GHC';
+currentCurrency = savedCurrency;
+document.getElementById('currencySelect').value = savedCurrency;
+document.getElementById('yearBadge').textContent = `${CURRENCIES[savedCurrency].symbol} · ${YEAR}`;
+document.title = `FinTrack · ${YEAR}`;
 loadFromStorage();
 switchMonth(MONTHS[new Date().getMonth()]);
 </script>
