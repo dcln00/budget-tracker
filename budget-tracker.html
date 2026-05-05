@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Budget Tracker · January 2025</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:         #0d1a12;
+    --bg2:        #132019;
+    --bg3:        #1a2d22;
+    --card:       #1e3328;
+    --card2:      #243d2e;
+    --border:     #2e5038;
+    --green:      #4ade80;
+    --green-dim:  #22c55e;
+    --green-dark: #166534;
+    --mint:       #bbf7d0;
+    --gold:       #fbbf24;
+    --red:        #f87171;
+    --text:       #e8f5ee;
+    --text-dim:   #86a890;
+    --text-muted: #4d7a5a;
+    --font-display: 'DM Serif Display', serif;
+    --font-body:    'Sora', sans-serif;
+    --font-mono:    'DM Mono', monospace;
+    --radius:     12px;
+    --radius-lg:  20px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Noise texture overlay ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  /* ── Header ── */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13,26,18,0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .logo-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+  .logo-badge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--green);
+    background: rgba(74,222,128,0.1);
+    border: 1px solid rgba(74,222,128,0.2);
+    padding: 2px 8px;
+    border-radius: 99px;
+    letter-spacing: 0.5px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .month-selector {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    padding: 7px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%234ade80'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 28px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    letter-spacing: 0.3px;
+  }
+  .btn-primary {
+    background: var(--green);
+    color: #0d1a12;
+  }
+  .btn-primary:hover { background: var(--mint); transform: translateY(-1px); }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+  .btn-ghost:hover { border-color: var(--green); color: var(--green); }
+
+  /* ── Main layout ── */
+  main {
+    position: relative;
+    z-index: 1;
+    padding: 24px 20px 60px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* ── KPI Strip ── */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .kpi-card:hover { border-color: var(--green-dim); transform: translateY(-2px); }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--green);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .kpi-card:hover::before { opacity: 1; }
+
+  .kpi-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  .kpi-value {
+    font-family: var(--font-mono);
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .kpi-value.income  { color: var(--green); }
+  .kpi-value.expense { color: var(--gold); }
+  .kpi-value.debt    { color: var(--red); }
+
+  .kpi-sub {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-family: var(--font-mono);
+  }
+
+  /* ── Overview + Amount Left ── */
+  .mid-row {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  /* ── Overview table ── */
+  .overview-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 14px 18px;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--green);
+  }
+
+  .overview-table { width: 100%; }
+  .overview-table tr { border-bottom: 1px solid var(--border); }
+  .overview-table tr:last-child { border-bottom: none; }
+  .overview-table td {
+    padding: 8px 10px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    white-space: nowrap;
+  }
+  .overview-table td:first-child { color: var(--text-dim); padding-left: 14px; }
+  .overview-table td:last-child  { padding-right: 14px; }
+  .overview-table td:not(:first-child) { text-align: right; }
+  .overview-table .ov-planned { color: var(--text-muted); }
+  .overview-table .ov-actual  { color: var(--text); font-weight: 500; }
+  .overview-table .ov-diff.pos { color: var(--green); }
+  .overview-table .ov-diff.neg { color: var(--red); }
+  .overview-table .total-row td {
+    background: var(--bg3);
+    color: var(--green);
+    font-weight: 500;
+    font-size: 12px;
+  }
+  .col-hdrs td {
+    font-size: 8px;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    padding-top: 10px;
+    padding-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  /* ── Amount Left ── */
+  .amount-left-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .amount-left-card::after {
+    content: '';
+    position: absolute;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(74,222,128,0.06) 0%, transparent 70%);
+    border-radius: 50%;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .amount-ring {
+    width: 150px; height: 150px;
+    border-radius: 50%;
+    border: 3px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 20px;
+    background: conic-gradient(var(--green) 0deg, var(--border) 0deg);
+    transition: background 0.6s;
+  }
+  .amount-ring-inner {
+    width: 126px; height: 126px;
+    border-radius: 50%;
+    background: var(--card);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .amount-left-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+  .amount-left-value {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--green);
+    transition: color 0.3s;
+  }
+  .amount-left-value.negative { color: var(--red); }
+
+  .amount-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+    width: 100%;
+  }
+  .amount-stat {
+    text-align: center;
+    padding: 10px;
+    background: var(--bg3);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  .amount-stat-label { font-size: 9px; color: var(--text-muted); font-family: var(--font-mono); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+  .amount-stat-val   { font-family: var(--font-mono); font-size: 13px; font-weight: 500; }
+
+  /* ── Sections grid ── */
+  .sections-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  /* ── Section card ── */
+  .section-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .section-header {
+    padding: 13px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+  .section-header:hover { background: var(--bg3); }
+  .section-title-wrap { display: flex; align-items: center; gap: 10px; }
+  .section-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .section-name {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .section-total {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--green);
+    text-align: right;
+  }
+  .section-total small { display: block; font-size: 9px; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; }
+
+  .section-body { padding: 0 0 8px; }
+
+  /* ── Section table ── */
+  .section-table { width: 100%; border-collapse: collapse; }
+  .section-table thead tr {
+    background: var(--bg3);
+  }
+  .section-table th {
+    padding: 7px 14px;
+    font-family: var(--font-mono);
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 400;
+    text-align: right;
+  }
+  .section-table th:first-child { text-align: left; }
+  .section-table tbody tr {
+    border-bottom: 1px solid rgba(46,80,56,0.4);
+    transition: background 0.15s;
+  }
+  .section-table tbody tr:last-child { border-bottom: none; }
+  .section-table tbody tr:hover { background: rgba(74,222,128,0.03); }
+  .section-table td {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+  .section-table td:first-child {
+    color: var(--text-dim);
+    font-size: 12px;
+  }
+  .section-table td:not(:first-child) { text-align: right; }
+
+  /* ── Editable inputs ── */
+  .num-input {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-align: right;
+    width: 90px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    outline: none;
+    transition: background 0.15s;
+  }
+  .num-input:focus {
+    background: rgba(74,222,128,0.08);
+    color: var(--green);
+  }
+  .num-input::placeholder { color: var(--text-muted); }
+
+  .item-name-input {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font-family: var(--font-body);
+    font-size: 12px;
+    width: 100%;
+    padding: 2px 4px;
+    border-radius: 4px;
+    outline: none;
+    transition: background 0.15s;
+  }
+  .item-name-input:focus {
+    background: rgba(74,222,128,0.05);
+    color: var(--text);
+  }
+
+  /* ── Progress bar ── */
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+  .progress-bar {
+    width: 50px; height: 4px;
+    background: var(--bg3);
+    border-radius: 99px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+  .progress-fill.over { background: var(--red); }
+  .progress-pct {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    min-width: 32px;
+    text-align: right;
+  }
+
+  /* ── Add row button ── */
+  .add-row-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-family: var(--font-body);
+    font-size: 11px;
+    cursor: pointer;
+    width: 100%;
+    transition: color 0.2s;
+    border-top: 1px dashed var(--border);
+    margin-top: 4px;
+  }
+  .add-row-btn:hover { color: var(--green); }
+
+  /* ── Delete row ── */
+  .del-btn {
+    background: none;
+    border: none;
+    color: transparent;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0 4px;
+    transition: color 0.15s;
+    line-height: 1;
+  }
+  .section-table tbody tr:hover .del-btn { color: var(--red); }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--green);
+    color: #0d1a12;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    z-index: 200;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* ── Responsive ── */
+  @media (max-width: 1100px) {
+    .kpi-strip { grid-template-columns: repeat(3, 1fr); }
+    .mid-row { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 700px) {
+    header { padding: 0 14px; }
+    .logo-title { font-size: 18px; }
+    main { padding: 14px 12px 60px; }
+    .kpi-strip { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .sections-grid { grid-template-columns: 1fr; }
+    .mid-row { grid-template-columns: 1fr; }
+    .amount-stats { grid-template-columns: 1fr 1fr; }
+    .num-input { width: 70px; }
+    .header-right { gap: 8px; }
+    .btn span { display: none; }
+  }
+  @media (max-width: 400px) {
+    .kpi-strip { grid-template-columns: 1fr 1fr; }
+    .kpi-value { font-size: 14px; }
+  }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .kpi-card, .section-card, .overview-card, .amount-left-card {
+    animation: fadeUp 0.5s ease both;
+  }
+  .kpi-card:nth-child(1) { animation-delay: 0.05s; }
+  .kpi-card:nth-child(2) { animation-delay: 0.10s; }
+  .kpi-card:nth-child(3) { animation-delay: 0.15s; }
+  .kpi-card:nth-child(4) { animation-delay: 0.20s; }
+  .kpi-card:nth-child(5) { animation-delay: 0.25s; }
+  .kpi-card:nth-child(6) { animation-delay: 0.30s; }
+
+  .section-card:nth-child(1) { animation-delay: 0.35s; }
+  .section-card:nth-child(2) { animation-delay: 0.40s; }
+  .section-card:nth-child(3) { animation-delay: 0.45s; }
+  .section-card:nth-child(4) { animation-delay: 0.50s; }
+  .section-card:nth-child(5) { animation-delay: 0.55s; }
+  .section-card:nth-child(6) { animation-delay: 0.60s; }
+
+  /* collapsed */
+  .section-body.collapsed { display: none; }
+  .chevron { transition: transform 0.2s; font-size: 12px; color: var(--text-muted); }
+  .chevron.open { transform: rotate(180deg); }
+
+  /* currency prefix */
+  .input-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 3px;
+  }
+
+  .currency-prefix {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-title">BudgetLeaf</span>
+    <span class="logo-badge" id="yearBadge">GH₵ · 2025</span>
+  </div>
+  <div class="header-right">
+    <select class="month-selector" id="monthSelect" onchange="switchMonth(this.value)">
+      <option value="January">January</option>
+      <option value="February">February</option>
+      <option value="March">March</option>
+      <option value="April">April</option>
+      <option value="May">May</option>
+      <option value="June">June</option>
+      <option value="July">July</option>
+      <option value="August">August</option>
+      <option value="September">September</option>
+      <option value="October">October</option>
+      <option value="November">November</option>
+      <option value="December">December</option>
+    </select>
+    <button class="btn btn-ghost" onclick="resetMonth()">↺ <span>Reset</span></button>
+    <button class="btn btn-primary" onclick="saveAll()">💾 <span>Save</span></button>
+  </div>
+</header>
+
+<main>
+  <!-- KPI Strip -->
+  <div class="kpi-strip" id="kpiStrip">
+    <div class="kpi-card">
+      <div class="kpi-label">Income</div>
+      <div class="kpi-value income" id="kpi-income">GH₵ 0.00</div>
+      <div class="kpi-sub" id="kpi-income-sub">0 sources</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Expenses</div>
+      <div class="kpi-value expense" id="kpi-expenses">GH₵ 0.00</div>
+      <div class="kpi-sub" id="kpi-expenses-sub">of GH₵ 0 planned</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Bills</div>
+      <div class="kpi-value expense" id="kpi-bills">GH₵ 0.00</div>
+      <div class="kpi-sub" id="kpi-bills-sub">of GH₵ 0 planned</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Savings</div>
+      <div class="kpi-value income" id="kpi-savings">GH₵ 0.00</div>
+      <div class="kpi-sub" id="kpi-savings-sub">of GH₵ 0 planned</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Debt</div>
+      <div class="kpi-value debt" id="kpi-debt">GH₵ 0.00</div>
+      <div class="kpi-sub" id="kpi-debt-sub">of GH₵ 0 planned</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Investments</div>
+      <div class="kpi-value income" id="kpi-investments">GH₵ 0.00</div>
+      <div class="kpi-sub" id="kpi-investments-sub">of GH₵ 0 planned</div>
+    </div>
+  </div>
+
+  <!-- Mid row -->
+  <div class="mid-row">
+    <!-- Overview -->
+    <div class="overview-card">
+      <div class="card-header">
+        <span class="card-title">Financial Overview</span>
+        <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted)" id="periodLabel">1 Jan – 31 Jan 2025</span>
+      </div>
+      <table class="overview-table">
+        <tr class="col-hdrs">
+          <td></td><td>PLANNED</td><td>ACTUAL</td><td>DIFF</td>
+        </tr>
+        <tr id="ov-income">
+          <td>+ Income</td>
+          <td class="ov-planned">—</td>
+          <td class="ov-actual">—</td>
+          <td class="ov-diff">—</td>
+        </tr>
+        <tr id="ov-expenses">
+          <td>− Expenses</td>
+          <td class="ov-planned">—</td>
+          <td class="ov-actual">—</td>
+          <td class="ov-diff">—</td>
+        </tr>
+        <tr id="ov-bills">
+          <td>− Bills</td>
+          <td class="ov-planned">—</td>
+          <td class="ov-actual">—</td>
+          <td class="ov-diff">—</td>
+        </tr>
+        <tr id="ov-savings">
+          <td>− Savings</td>
+          <td class="ov-planned">—</td>
+          <td class="ov-actual">—</td>
+          <td class="ov-diff">—</td>
+        </tr>
+        <tr id="ov-debt">
+          <td>− Debt</td>
+          <td class="ov-planned">—</td>
+          <td class="ov-actual">—</td>
+          <td class="ov-diff">—</td>
+        </tr>
+        <tr id="ov-investments">
+          <td>− Investments</td>
+          <td class="ov-planned">—</td>
+          <td class="ov-actual">—</td>
+          <td class="ov-diff">—</td>
+        </tr>
+        <tr class="total-row">
+          <td>Balance Left</td>
+          <td id="ov-left-planned">GH₵ 0.00</td>
+          <td id="ov-left-actual">GH₵ 0.00</td>
+          <td id="ov-left-diff">—</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Amount Left -->
+    <div class="amount-left-card">
+      <div class="card-header" style="width:100%;border-radius:var(--radius) var(--radius) 0 0;margin-bottom:20px;background:var(--bg3);border:1px solid var(--border);">
+        <span class="card-title">Amount Left to Spend</span>
+        <span style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted)" id="savingsRateLabel">Savings rate: 0%</span>
+      </div>
+      <div class="amount-ring" id="amountRing">
+        <div class="amount-ring-inner">
+          <div class="amount-left-label">Available</div>
+          <div class="amount-left-value" id="amountLeftValue">GH₵ 0</div>
+        </div>
+      </div>
+      <div class="amount-stats">
+        <div class="amount-stat">
+          <div class="amount-stat-label">Planned</div>
+          <div class="amount-stat-val" style="color:var(--text-dim)" id="stat-planned-left">GH₵ 0</div>
+        </div>
+        <div class="amount-stat">
+          <div class="amount-stat-label">Spent</div>
+          <div class="amount-stat-val" style="color:var(--gold)" id="stat-spent">GH₵ 0</div>
+        </div>
+        <div class="amount-stat">
+          <div class="amount-stat-label">Saved</div>
+          <div class="amount-stat-val" style="color:var(--green)" id="stat-saved">GH₵ 0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sections grid -->
+  <div class="sections-grid" id="sectionsGrid"></div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+const YEAR = new Date().getFullYear();
+const MONTHS = ['January','February','March','April','May','June',
+                'July','August','September','October','November','December'];
+
+const SECTIONS_META = [
+  { id:'income',      label:'Income',      icon:'💼', color:'#4ade80', hasProgress:false,
+    defaults:[
+      {name:'Freelance Project A', planned:'', actual:''},
+      {name:'Freelance Project B', planned:'', actual:''},
+      {name:'Retainer Fee',        planned:'', actual:''},
+      {name:'Other Income',        planned:'', actual:''},
+    ]},
+  { id:'expenses',    label:'Expenses',    icon:'🛒', color:'#fbbf24', hasProgress:true,
+    defaults:[
+      {name:'Groceries',        planned:'', actual:''},
+      {name:'Eating Out',       planned:'', actual:''},
+      {name:'Transportation',   planned:'', actual:''},
+      {name:'Shopping',         planned:'', actual:''},
+      {name:'Personal Care',    planned:'', actual:''},
+    ]},
+  { id:'bills',       label:'Bills',       icon:'📋', color:'#fbbf24', hasProgress:true,
+    defaults:[
+      {name:'Rent / Mortgage',  planned:'', actual:''},
+      {name:'Electricity (ECG)',planned:'', actual:''},
+      {name:'Water',            planned:'', actual:''},
+      {name:'Internet',         planned:'', actual:''},
+      {name:'Mobile Data',      planned:'', actual:''},
+      {name:'Insurance',        planned:'', actual:''},
+    ]},
+  { id:'savings',     label:'Savings',     icon:'🏦', color:'#4ade80', hasProgress:true,
+    defaults:[
+      {name:'Emergency Fund',      planned:'', actual:''},
+      {name:'Susu / Group Savings',planned:'', actual:''},
+      {name:'Education Fund',      planned:'', actual:''},
+      {name:'Home Purchase',       planned:'', actual:''},
+    ]},
+  { id:'debt',        label:'Debt',        icon:'💳', color:'#f87171', hasProgress:true,
+    defaults:[
+      {name:'Bank Loan',        planned:'', actual:''},
+      {name:'Credit Card',      planned:'', actual:''},
+      {name:'Mobile Money Loan',planned:'', actual:''},
+    ]},
+  { id:'investments', label:'Investments', icon:'📈', color:'#4ade80', hasProgress:true,
+    defaults:[
+      {name:'Stocks / Equities', planned:'', actual:''},
+      {name:'Treasury Bills',    planned:'', actual:''},
+      {name:'Fixed Deposit',     planned:'', actual:''},
+      {name:'Mutual Fund',       planned:'', actual:''},
+    ]},
+];
+
+let currentMonth = 'January';
+let data = {}; // { monthName: { sectionId: [{name, planned, actual}] } }
+
+// ── Storage ────────────────────────────────────────────────────────────────
+function storageKey() { return `budgetleaf_${YEAR}`; }
+
+function loadFromStorage() {
+  try {
+    const raw = localStorage.getItem(storageKey());
+    if (raw) data = JSON.parse(raw);
+  } catch(e) { data = {}; }
+}
+
+function saveToStorage() {
+  try {
+    localStorage.setItem(storageKey(), JSON.stringify(data));
+  } catch(e) {}
+}
+
+function getMonthData(month) {
+  if (!data[month]) {
+    data[month] = {};
+    SECTIONS_META.forEach(s => {
+      data[month][s.id] = s.defaults.map(d => ({...d}));
+    });
+  }
+  return data[month];
+}
+
+// ── Format ─────────────────────────────────────────────────────────────────
+function fmt(n) {
+  if (isNaN(n) || n === null || n === '') return '—';
+  return 'GH₵ ' + Number(n).toLocaleString('en-GH', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function fmtShort(n) {
+  if (!n) return 'GH₵ 0';
+  return 'GH₵ ' + Number(n).toLocaleString('en-GH', {minimumFractionDigits:0, maximumFractionDigits:0});
+}
+function pct(actual, planned) {
+  if (!planned || planned == 0) return null;
+  return Math.round((actual / planned) * 100);
+}
+function v(s) { return parseFloat(s) || 0; }
+
+// ── Build sections UI ──────────────────────────────────────────────────────
+function buildSections() {
+  const grid = document.getElementById('sectionsGrid');
+  grid.innerHTML = '';
+  const monthData = getMonthData(currentMonth);
+
+  SECTIONS_META.forEach(meta => {
+    const items = monthData[meta.id];
+    const card = document.createElement('div');
+    card.className = 'section-card';
+    card.id = `card-${meta.id}`;
+
+    const totalActual  = items.reduce((s,r) => s + v(r.actual), 0);
+    const totalPlanned = items.reduce((s,r) => s + v(r.planned), 0);
+
+    card.innerHTML = `
+      <div class="section-header" onclick="toggleSection('${meta.id}')">
+        <div class="section-title-wrap">
+          <div class="section-icon" style="background:${meta.color}18">${meta.icon}</div>
+          <span class="section-name">${meta.label}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="section-total">
+            <span>${fmt(totalActual)}</span>
+            <small>${totalPlanned ? 'of ' + fmtShort(totalPlanned) : 'no plan set'}</small>
+          </div>
+          <span class="chevron open" id="chev-${meta.id}">▾</span>
+        </div>
+      </div>
+      <div class="section-body" id="body-${meta.id}">
+        <table class="section-table">
+          <thead>
+            <tr>
+              <th style="text-align:left;width:40%">Item</th>
+              <th>Planned</th>
+              <th>Actual</th>
+              ${meta.hasProgress ? '<th>Progress</th>' : ''}
+              <th style="width:20px"></th>
+            </tr>
+          </thead>
+          <tbody id="tbody-${meta.id}"></tbody>
+        </table>
+        <button class="add-row-btn" onclick="addRow('${meta.id}')">+ Add item</button>
+      </div>
+    `;
+    grid.appendChild(card);
+    renderRows(meta.id);
+  });
+}
+
+function renderRows(sectionId) {
+  const meta = SECTIONS_META.find(m => m.id === sectionId);
+  const tbody = document.getElementById(`tbody-${sectionId}`);
+  const items = getMonthData(currentMonth)[sectionId];
+  tbody.innerHTML = '';
+
+  items.forEach((item, idx) => {
+    const p = v(item.planned);
+    const a = v(item.actual);
+    const pctVal = meta.hasProgress ? pct(a, p) : null;
+    const over = pctVal > 100;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <input class="item-name-input" value="${escHtml(item.name)}"
+          placeholder="Item name"
+          onchange="updateItem('${sectionId}',${idx},'name',this.value)" />
+      </td>
+      <td>
+        <div class="input-wrap">
+          <input class="num-input" value="${item.planned}" placeholder="0.00"
+            type="number" min="0" step="0.01"
+            onchange="updateItem('${sectionId}',${idx},'planned',this.value)"
+            oninput="updateItem('${sectionId}',${idx},'planned',this.value)" />
+          <span class="currency-prefix">₵</span>
+        </div>
+      </td>
+      <td>
+        <div class="input-wrap">
+          <input class="num-input" value="${item.actual}" placeholder="0.00"
+            type="number" min="0" step="0.01"
+            onchange="updateItem('${sectionId}',${idx},'actual',this.value)"
+            oninput="updateItem('${sectionId}',${idx},'actual',this.value)" />
+          <span class="currency-prefix">₵</span>
+        </div>
+      </td>
+      ${meta.hasProgress ? `
+      <td>
+        <div class="progress-wrap">
+          <div class="progress-bar">
+            <div class="progress-fill ${over?'over':''}" style="width:${Math.min(pctVal||0,100)}%"></div>
+          </div>
+          <span class="progress-pct" style="color:${over?'var(--red)':'var(--text-muted)'}">${pctVal !== null ? pctVal+'%' : '—'}</span>
+        </div>
+      </td>` : ''}
+      <td><button class="del-btn" onclick="deleteRow('${sectionId}',${idx})" title="Remove">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toggleSection(id) {
+  const body = document.getElementById(`body-${id}`);
+  const chev = document.getElementById(`chev-${id}`);
+  body.classList.toggle('collapsed');
+  chev.classList.toggle('open');
+}
+
+function addRow(sectionId) {
+  const items = getMonthData(currentMonth)[sectionId];
+  items.push({name:'', planned:'', actual:''});
+  renderRows(sectionId);
+  updateAll();
+}
+
+function deleteRow(sectionId, idx) {
+  const items = getMonthData(currentMonth)[sectionId];
+  items.splice(idx, 1);
+  renderRows(sectionId);
+  updateAll();
+}
+
+function updateItem(sectionId, idx, field, value) {
+  const items = getMonthData(currentMonth)[sectionId];
+  items[idx][field] = value;
+  // Refresh progress bar only for this row without full re-render
+  const meta = SECTIONS_META.find(m => m.id === sectionId);
+  if (meta.hasProgress) {
+    const p = v(items[idx].planned);
+    const a = v(items[idx].actual);
+    const pctVal = pct(a, p);
+    const over = pctVal > 100;
+    const tbody = document.getElementById(`tbody-${sectionId}`);
+    const row = tbody.rows[idx];
+    if (row && meta.hasProgress) {
+      const fill = row.querySelector('.progress-fill');
+      const pctEl = row.querySelector('.progress-pct');
+      if (fill) {
+        fill.style.width = Math.min(pctVal||0, 100) + '%';
+        fill.className = 'progress-fill' + (over ? ' over' : '');
+      }
+      if (pctEl) {
+        pctEl.textContent = pctVal !== null ? pctVal + '%' : '—';
+        pctEl.style.color = over ? 'var(--red)' : 'var(--text-muted)';
+      }
+    }
+  }
+  updateAll();
+}
+
+// ── Compute & update all KPIs ──────────────────────────────────────────────
+function updateAll() {
+  const monthData = getMonthData(currentMonth);
+
+  const totals = {};
+  SECTIONS_META.forEach(meta => {
+    const items = monthData[meta.id];
+    totals[meta.id] = {
+      planned: items.reduce((s,r) => s + v(r.planned), 0),
+      actual:  items.reduce((s,r) => s + v(r.actual),  0),
+    };
+  });
+
+  // KPI boxes
+  document.getElementById('kpi-income').textContent = fmt(totals.income.actual);
+  document.getElementById('kpi-income-sub').textContent =
+    monthData.income.filter(r=>r.name).length + ' sources';
+
+  ['expenses','bills','savings','debt','investments'].forEach(id => {
+    document.getElementById(`kpi-${id}`).textContent = fmt(totals[id].actual);
+    document.getElementById(`kpi-${id}-sub`).textContent =
+      'of ' + fmtShort(totals[id].planned) + ' planned';
+  });
+
+  // Section card headers
+  SECTIONS_META.forEach(meta => {
+    const card = document.getElementById(`card-${meta.id}`);
+    if (!card) return;
+    const totalEl = card.querySelector('.section-total span');
+    const subEl   = card.querySelector('.section-total small');
+    if (totalEl) totalEl.textContent = fmt(totals[meta.id].actual);
+    if (subEl)   subEl.textContent = totals[meta.id].planned
+      ? 'of ' + fmtShort(totals[meta.id].planned)
+      : 'no plan set';
+  });
+
+  // Overview table
+  const outflows = ['expenses','bills','savings','debt','investments'];
+  const ovRows = {
+    income: { planned: totals.income.planned, actual: totals.income.actual },
+  };
+  outflows.forEach(id => {
+    ovRows[id] = { planned: totals[id].planned, actual: totals[id].actual };
+  });
+
+  function setOvRow(id, planned, actual) {
+    const tr = document.getElementById(`ov-${id}`);
+    if (!tr) return;
+    const diff = id === 'income' ? actual - planned : planned - actual;
+    tr.children[1].textContent = fmt(planned);
+    tr.children[2].textContent = fmt(actual);
+    const dc = tr.children[3];
+    if (planned || actual) {
+      dc.textContent = (diff >= 0 ? '+' : '') + fmt(Math.abs(diff)).replace('GH₵ ','GH₵ ' + (diff<0?'-':''));
+      dc.textContent = fmt(diff);
+      dc.className = 'ov-diff ' + (diff >= 0 ? 'pos' : 'neg');
+    } else {
+      dc.textContent = '—';
+      dc.className = 'ov-diff';
+    }
+  }
+
+  setOvRow('income',      totals.income.planned,      totals.income.actual);
+  setOvRow('expenses',    totals.expenses.planned,    totals.expenses.actual);
+  setOvRow('bills',       totals.bills.planned,       totals.bills.actual);
+  setOvRow('savings',     totals.savings.planned,     totals.savings.actual);
+  setOvRow('debt',        totals.debt.planned,        totals.debt.actual);
+  setOvRow('investments', totals.investments.planned, totals.investments.actual);
+
+  const outflowPlanned = outflows.reduce((s,id) => s + totals[id].planned, 0);
+  const outflowActual  = outflows.reduce((s,id) => s + totals[id].actual, 0);
+  const leftPlanned = totals.income.planned - outflowPlanned;
+  const leftActual  = totals.income.actual  - outflowActual;
+
+  document.getElementById('ov-left-planned').textContent = fmt(leftPlanned);
+  document.getElementById('ov-left-actual').textContent  = fmt(leftActual);
+  const leftDiff = leftActual - leftPlanned;
+  const leftDiffEl = document.getElementById('ov-left-diff');
+  leftDiffEl.textContent = fmt(leftDiff);
+  leftDiffEl.style.color = leftDiff >= 0 ? 'var(--green)' : 'var(--red)';
+
+  // Amount Left card
+  const amtEl = document.getElementById('amountLeftValue');
+  amtEl.textContent = fmtShort(leftActual);
+  amtEl.className = 'amount-left-value' + (leftActual < 0 ? ' negative' : '');
+
+  // Ring progress
+  const ring = document.getElementById('amountRing');
+  const incomeActual = totals.income.actual;
+  const spentPct = incomeActual > 0 ? Math.min((outflowActual / incomeActual) * 360, 360) : 0;
+  const greenColor = leftActual >= 0 ? '#4ade80' : '#f87171';
+  ring.style.background = `conic-gradient(${greenColor} ${spentPct}deg, var(--border) ${spentPct}deg)`;
+
+  document.getElementById('stat-planned-left').textContent = fmtShort(leftPlanned);
+  document.getElementById('stat-spent').textContent = fmtShort(outflowActual);
+  document.getElementById('stat-saved').textContent = fmtShort(totals.savings.actual);
+
+  // Savings rate
+  const savRate = incomeActual > 0 ? Math.round((totals.savings.actual / incomeActual)*100) : 0;
+  document.getElementById('savingsRateLabel').textContent = `Savings rate: ${savRate}%`;
+
+  // Auto-save
+  saveToStorage();
+}
+
+// ── Month switching ────────────────────────────────────────────────────────
+function switchMonth(month) {
+  currentMonth = month;
+  document.getElementById('monthSelect').value = month;
+  const monthNum = MONTHS.indexOf(month) + 1;
+  const daysInMonth = new Date(YEAR, monthNum, 0).getDate();
+  document.getElementById('periodLabel').textContent =
+    `1 ${month.slice(0,3)} – ${daysInMonth} ${month.slice(0,3)} ${YEAR}`;
+  buildSections();
+  updateAll();
+}
+
+function saveAll() {
+  saveToStorage();
+  showToast('✓ Saved to local storage');
+}
+
+function resetMonth() {
+  if (!confirm(`Reset all data for ${currentMonth}? This cannot be undone.`)) return;
+  data[currentMonth] = {};
+  SECTIONS_META.forEach(s => {
+    data[currentMonth][s.id] = s.defaults.map(d => ({...d}));
+  });
+  saveToStorage();
+  buildSections();
+  updateAll();
+  showToast('Month reset');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+document.getElementById('yearBadge').textContent = `GH₵ · ${YEAR}`;
+document.title = `Budget Tracker · ${YEAR}`;
+loadFromStorage();
+switchMonth(MONTHS[new Date().getMonth()]);
+</script>
+</body>
+</html>
