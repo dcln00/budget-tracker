@@ -548,6 +548,22 @@
   }
   .toast.show { opacity: 1; transform: translateY(0); }
 
+  /* ── Settings button (mobile only) ── */
+  .settings-btn {
+    display: none;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s, color 0.2s;
+    flex-shrink: 0;
+  }
+  .settings-btn:hover { border-color: var(--green); color: var(--green); }
+
   /* ── Responsive ── */
   @media (max-width: 1100px) {
     .kpi-strip { grid-template-columns: repeat(3, 1fr); }
@@ -562,13 +578,76 @@
     .mid-row { grid-template-columns: 1fr; }
     .amount-stats { grid-template-columns: 1fr 1fr; }
     .num-input { width: 70px; }
-    .header-right { gap: 8px; }
-    .btn span { display: none; }
+    .header-right { display: none; }
+    .settings-btn { display: flex; }
+    .col-progress { display: none; }
   }
   @media (max-width: 400px) {
     .kpi-strip { grid-template-columns: 1fr 1fr; }
     .kpi-value { font-size: 14px; }
   }
+
+
+  /* ── Settings modal ── */
+  .settings-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 200;
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .settings-modal {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    z-index: 201;
+    overflow: hidden;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .settings-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .settings-modal.open {
+    transform: translateY(0);
+  }
+  .settings-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg3);
+  }
+  .settings-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: color 0.2s;
+  }
+  .settings-close:hover { color: var(--red); }
+  .settings-modal-body { padding: 18px; display: flex; flex-direction: column; gap: 16px; }
+  .settings-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .settings-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+  .settings-row .month-selector { flex: 1; }
+  .settings-actions { display: flex; gap: 10px; padding-top: 4px; }
 
   /* ── Animations ── */
   @keyframes fadeUp {
@@ -636,7 +715,7 @@
       <option value="December">December</option>
     </select>
     <select class="month-selector" id="currencySelect" onchange="switchCurrency(this.value)">
-      <option value="GHC">₵ Cedi</option>
+      <option value="GHC">GH₵ Cedi</option>
       <option value="USD">$ Dollar</option>
       <option value="GBP">£ Pound</option>
       <option value="EUR">€ Euro</option>
@@ -645,7 +724,54 @@
     <button class="btn btn-ghost" onclick="resetMonth()">↺ <span>Reset</span></button>
     <button class="btn btn-primary" onclick="saveAll()">💾 <span>Save</span></button>
   </div>
+  <button class="settings-btn" onclick="openSettings()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </svg>
+  </button>
 </header>
+
+<!-- Settings Modal -->
+<div class="settings-overlay" id="settingsOverlay" onclick="closeSettings()"></div>
+<div class="settings-modal" id="settingsModal">
+  <div class="settings-modal-header">
+    <span class="card-title">Settings</span>
+    <button class="settings-close" onclick="closeSettings()">✕</button>
+  </div>
+  <div class="settings-modal-body">
+    <div class="settings-row">
+      <label class="settings-label">Month</label>
+      <select class="month-selector" id="monthSelectMobile" onchange="switchMonth(this.value)">
+        <option value="January">January</option>
+        <option value="February">February</option>
+        <option value="March">March</option>
+        <option value="April">April</option>
+        <option value="May">May</option>
+        <option value="June">June</option>
+        <option value="July">July</option>
+        <option value="August">August</option>
+        <option value="September">September</option>
+        <option value="October">October</option>
+        <option value="November">November</option>
+        <option value="December">December</option>
+      </select>
+    </div>
+    <div class="settings-row">
+      <label class="settings-label">Currency</label>
+      <select class="month-selector" id="currencySelectMobile" onchange="switchCurrency(this.value)">
+        <option value="GHC">GH₵ Cedi</option>
+        <option value="USD">$ Dollar</option>
+        <option value="GBP">£ Pound</option>
+        <option value="EUR">€ Euro</option>
+        <option value="NGN">₦ Naira</option>
+      </select>
+    </div>
+    <div class="settings-actions">
+      <button class="btn btn-ghost" style="flex:1" onclick="resetMonth();closeSettings()">↺ Reset</button>
+      <button class="btn btn-primary" style="flex:1" onclick="saveAll();closeSettings()">💾 Save</button>
+    </div>
+  </div>
+</div>
 
 <main>
   <!-- KPI Strip -->
@@ -919,7 +1045,7 @@ function buildSections() {
               <th style="text-align:left;width:40%">Item</th>
               <th>Planned</th>
               <th>Actual</th>
-              ${meta.hasProgress ? '<th>Progress</th>' : ''}
+              ${meta.hasProgress ? '<th class="col-progress">Progress</th>' : ''}
               <th style="width:20px"></th>
             </tr>
           </thead>
@@ -971,7 +1097,7 @@ function renderRows(sectionId) {
         </div>
       </td>
       ${meta.hasProgress ? `
-      <td>
+      <td class="col-progress">
         <div class="progress-wrap">
           <div class="progress-bar">
             <div class="progress-fill ${over?'over':''}" style="width:${Math.min(pctVal||0,100)}%"></div>
@@ -1147,6 +1273,7 @@ function updateAll() {
 function switchMonth(month) {
   currentMonth = month;
   document.getElementById('monthSelect').value = month;
+  document.getElementById('monthSelectMobile').value = month;
   const monthNum = MONTHS.indexOf(month) + 1;
   const daysInMonth = new Date(YEAR, monthNum, 0).getDate();
   document.getElementById('periodLabel').textContent =
@@ -1183,17 +1310,49 @@ function showToast(msg) {
 function switchCurrency(code) {
   currentCurrency = code;
   localStorage.setItem('fintrack_currency', code);
+  document.getElementById('currencySelect').value = code;
+  document.getElementById('currencySelectMobile').value = code;
   document.getElementById('yearBadge').textContent = `${CURRENCIES[code].symbol} · ${YEAR}`;
   buildSections();
   updateAll();
+}
+
+// ── Settings modal ─────────────────────────────────────────────────────────
+function openSettings() {
+  document.getElementById('settingsOverlay').classList.add('open');
+  document.getElementById('settingsModal').classList.add('open');
+}
+function closeSettings() {
+  document.getElementById('settingsOverlay').classList.remove('open');
+  document.getElementById('settingsModal').classList.remove('open');
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────
 const savedCurrency = localStorage.getItem('fintrack_currency') || 'GHC';
 currentCurrency = savedCurrency;
 document.getElementById('currencySelect').value = savedCurrency;
+document.getElementById('currencySelectMobile').value = savedCurrency;
 document.getElementById('yearBadge').textContent = `${CURRENCIES[savedCurrency].symbol} · ${YEAR}`;
 document.title = `FinTrack · ${YEAR}`;
+
+const CURRENCY_LABELS = {
+  GHC: { full: 'GH₵ Cedi',  short: 'GH₵' },
+  USD: { full: '$ Dollar',   short: '$'   },
+  GBP: { full: '£ Pound',    short: '£'   },
+  EUR: { full: '€ Euro',     short: '€'   },
+  NGN: { full: '₦ Naira',    short: '₦'   },
+};
+
+function updateCurrencyLabels() {
+  const isMobile = window.innerWidth <= 700;
+  Array.from(document.getElementById('currencySelect').options).forEach(opt => {
+    opt.text = isMobile ? CURRENCY_LABELS[opt.value].short : CURRENCY_LABELS[opt.value].full;
+  });
+}
+
+updateCurrencyLabels();
+window.addEventListener('resize', updateCurrencyLabels);
+
 loadFromStorage();
 switchMonth(MONTHS[new Date().getMonth()]);
 </script>
