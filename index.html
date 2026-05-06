@@ -211,7 +211,7 @@
   /* ── Overview + Amount Left ── */
   .mid-row {
     display: grid;
-    grid-template-columns: 380px 1fr;
+    grid-template-columns: 420px 1fr;
     gap: 16px;
     margin-bottom: 20px;
   }
@@ -326,9 +326,11 @@
   }
   .amount-left-value {
     font-family: var(--font-mono);
-    font-size: 22px;
+    font-size: 18px;
     font-weight: 500;
     color: var(--green);
+    white-space: nowrap;
+    text-align: center;
     transition: color 0.3s;
   }
   .amount-left-value.negative { color: var(--red); }
@@ -715,14 +717,14 @@
       <option value="December">December</option>
     </select>
     <select class="month-selector" id="currencySelect" onchange="switchCurrency(this.value)">
-      <option value="GHC">GH₵ Cedi</option>
+      <option value="GHC">₵ Cedi</option>
       <option value="USD">$ Dollar</option>
       <option value="GBP">£ Pound</option>
       <option value="EUR">€ Euro</option>
       <option value="NGN">₦ Naira</option>
     </select>
-    <button class="btn btn-ghost" onclick="resetMonth()">↺ <span>Reset</span></button>
-    <button class="btn btn-primary" onclick="saveAll()">💾 <span>Save</span></button>
+    <button class="btn btn-ghost" onclick="resetMonth()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12.207 2.293a1 1 0 0 1 0 1.414L10.914 5H12.5c4.652 0 8.5 3.848 8.5 8.5S17.152 22 12.5 22S4 18.152 4 13.5a1 1 0 1 1 2 0c0 3.548 2.952 6.5 6.5 6.5s6.5-2.952 6.5-6.5S16.048 7 12.5 7h-1.586l1.293 1.293a1 1 0 0 1-1.414 1.414l-3-3a1 1 0 0 1 0-1.414l3-3a1 1 0 0 1 1.414 0"/></svg><span>Reset</span></button>
+    <button class="btn btn-primary" onclick="saveAll()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M8.5 3.75v1.897c0 .46.375.838.844.838h5.312a.84.84 0 0 0 .844-.838v-1.83a2.5 2.5 0 0 0-.57-.067zm8.813 18H6.688a3.93 3.93 0 0 1-3.938-3.927V6.176A3.93 3.93 0 0 1 6.688 2.25h8.242a3.95 3.95 0 0 1 2.783 1.15l2.383 2.374A3.92 3.92 0 0 1 21.25 8.55v9.272a3.93 3.93 0 0 1-3.937 3.927m-1.813-1.5v-4.015a.84.84 0 0 0-.844-.838H9.344a.84.84 0 0 0-.844.838v4.015z"/></svg> <span>Save</span></button>
   </div>
   <button class="settings-btn" onclick="openSettings()">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -759,7 +761,7 @@
     <div class="settings-row">
       <label class="settings-label">Currency</label>
       <select class="month-selector" id="currencySelectMobile" onchange="switchCurrency(this.value)">
-        <option value="GHC">GH₵ Cedi</option>
+        <option value="GHC">₵ Cedi</option>
         <option value="USD">$ Dollar</option>
         <option value="GBP">£ Pound</option>
         <option value="EUR">€ Euro</option>
@@ -767,8 +769,8 @@
       </select>
     </div>
     <div class="settings-actions">
-      <button class="btn btn-ghost" style="flex:1" onclick="resetMonth();closeSettings()">↺ Reset</button>
-      <button class="btn btn-primary" style="flex:1" onclick="saveAll();closeSettings()">💾 Save</button>
+      <button class="btn btn-ghost" style="flex:1" onclick="resetMonth();closeSettings()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12.207 2.293a1 1 0 0 1 0 1.414L10.914 5H12.5c4.652 0 8.5 3.848 8.5 8.5S17.152 22 12.5 22S4 18.152 4 13.5a1 1 0 1 1 2 0c0 3.548 2.952 6.5 6.5 6.5s6.5-2.952 6.5-6.5S16.048 7 12.5 7h-1.586l1.293 1.293a1 1 0 0 1-1.414 1.414l-3-3a1 1 0 0 1 0-1.414l3-3a1 1 0 0 1 1.414 0"/></svg>Reset</button>
+      <button class="btn btn-primary" style="flex:1" onclick="saveAll();closeSettings()"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M8.5 3.75v1.897c0 .46.375.838.844.838h5.312a.84.84 0 0 0 .844-.838v-1.83a2.5 2.5 0 0 0-.57-.067zm8.813 18H6.688a3.93 3.93 0 0 1-3.938-3.927V6.176A3.93 3.93 0 0 1 6.688 2.25h8.242a3.95 3.95 0 0 1 2.783 1.15l2.383 2.374A3.92 3.92 0 0 1 21.25 8.55v9.272a3.93 3.93 0 0 1-3.937 3.927m-1.813-1.5v-4.015a.84.84 0 0 0-.844-.838H9.344a.84.84 0 0 0-.844.838v4.015z"/></svg> Save</button>
     </div>
   </div>
 </div>
@@ -874,7 +876,7 @@
       <div class="amount-ring" id="amountRing">
         <div class="amount-ring-inner">
           <div class="amount-left-label">Available</div>
-          <div class="amount-left-value" id="amountLeftValue">GH₵ 0</div>
+          <div class="amount-left-value" id="amountLeftValue">₵ 0</div>
         </div>
       </div>
       <div class="amount-stats">
@@ -907,7 +909,7 @@ const MONTHS = ['January','February','March','April','May','June',
                 'July','August','September','October','November','December'];
 
 const CURRENCIES = {
-  GHC: { symbol: 'GH₵', short: '₵',  locale: 'en-GH' },
+  GHC: { symbol: '₵',   short: '₵',  locale: 'en-GH' },
   USD: { symbol: '$',    short: '$',  locale: 'en-US' },
   GBP: { symbol: '£',   short: '£',  locale: 'en-GB' },
   EUR: { symbol: '€',   short: '€',  locale: 'de-DE' },
@@ -999,9 +1001,21 @@ function fmt(n) {
   return symbol + ' ' + Number(n).toLocaleString(locale, {minimumFractionDigits:2, maximumFractionDigits:2});
 }
 function fmtShort(n) {
-  const { symbol, locale } = CURRENCIES[currentCurrency];
-  if (!n) return symbol + ' 0';
-  return symbol + ' ' + Number(n).toLocaleString(locale, {minimumFractionDigits:0, maximumFractionDigits:0});
+  const { symbol } = CURRENCIES[currentCurrency];
+  if (!n && n !== 0) return symbol + ' 0';
+  return symbol + ' ' + abbreviate(n);
+}
+function fmtCompact(n) {
+  if (isNaN(n) || n === null || n === '') return '—';
+  const { symbol } = CURRENCIES[currentCurrency];
+  return symbol + ' ' + abbreviate(n);
+}
+function abbreviate(n) {
+  const abs = Math.abs(n);
+  const sign = n < 0 ? '-' : '';
+  if (abs >= 1_000_000) return sign + (abs / 1_000_000).toLocaleString(undefined, {maximumFractionDigits:1}) + 'M';
+  if (abs >= 1_000)     return sign + (abs / 1_000).toLocaleString(undefined, {maximumFractionDigits:1}) + 'K';
+  return sign + abs.toLocaleString(undefined, {maximumFractionDigits:0});
 }
 function pct(actual, planned) {
   if (!planned || planned == 0) return null;
@@ -1213,12 +1227,11 @@ function updateAll() {
     const tr = document.getElementById(`ov-${id}`);
     if (!tr) return;
     const diff = id === 'income' ? actual - planned : planned - actual;
-    tr.children[1].textContent = fmt(planned);
-    tr.children[2].textContent = fmt(actual);
+    tr.children[1].textContent = fmtCompact(planned);
+    tr.children[2].textContent = fmtCompact(actual);
     const dc = tr.children[3];
     if (planned || actual) {
-      dc.textContent = (diff >= 0 ? '+' : '') + fmt(Math.abs(diff)).replace('GH₵ ','GH₵ ' + (diff<0?'-':''));
-      dc.textContent = fmt(diff);
+      dc.textContent = fmtCompact(diff);
       dc.className = 'ov-diff ' + (diff >= 0 ? 'pos' : 'neg');
     } else {
       dc.textContent = '—';
@@ -1238,11 +1251,11 @@ function updateAll() {
   const leftPlanned = totals.income.planned - outflowPlanned;
   const leftActual  = totals.income.actual  - outflowActual;
 
-  document.getElementById('ov-left-planned').textContent = fmt(leftPlanned);
-  document.getElementById('ov-left-actual').textContent  = fmt(leftActual);
+  document.getElementById('ov-left-planned').textContent = fmtCompact(leftPlanned);
+  document.getElementById('ov-left-actual').textContent  = fmtCompact(leftActual);
   const leftDiff = leftActual - leftPlanned;
   const leftDiffEl = document.getElementById('ov-left-diff');
-  leftDiffEl.textContent = fmt(leftDiff);
+  leftDiffEl.textContent = fmtCompact(leftDiff);
   leftDiffEl.style.color = leftDiff >= 0 ? 'var(--green)' : 'var(--red)';
 
   // Amount Left card
@@ -1336,7 +1349,7 @@ document.getElementById('yearBadge').textContent = `${CURRENCIES[savedCurrency].
 document.title = `FinTrack · ${YEAR}`;
 
 const CURRENCY_LABELS = {
-  GHC: { full: 'GH₵ Cedi',  short: 'GH₵' },
+  GHC: { full: '₵ Cedi',  short: '₵' },
   USD: { full: '$ Dollar',   short: '$'   },
   GBP: { full: '£ Pound',    short: '£'   },
   EUR: { full: '€ Euro',     short: '€'   },
